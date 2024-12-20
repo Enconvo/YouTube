@@ -19,7 +19,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
         throw new Error("No youtube video to be processed")
     }
 
-    const transcript = await YoutubeTranscript.fetchTranscript(inputText,{
+    const transcript = await YoutubeTranscript.fetchTranscript(inputText, {
         lang: "en"
     })
     const result = transcript.reduce((acc, t, index) => {
@@ -55,13 +55,18 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
         Action.Copy({ content: result })
     ]
 
+    const truncateText = (text: string): string => {
+        if (text.length <= 1000) return text;
+        return text.slice(0, 500) + text.slice(-500) + `\n\n **result truncated, use [Copy] or [Paste] or [Save As ${options.with_timestamps ? "SRT" : "TXT"}] action to get full result**`;
+    };
+
+    const showResult = truncateText(result);
     const output: EnconvoResponse = {
         type: "text",
-        content: result,
+        content: showResult,
         actions: actions
     }
 
 
     return output;
 }
-

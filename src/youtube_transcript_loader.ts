@@ -1,6 +1,6 @@
 import { Action, EnconvoResponse, Exporter, RequestOptions, ResponseAction } from "@enconvo/api";
-import { YoutubeTranscript } from 'youtube-transcript';
 import fs from "fs";
+import { YoutubeLoader } from "./youtube_loader.ts";
 
 interface Params extends RequestOptions {
     with_timestamps: boolean;
@@ -10,26 +10,19 @@ interface Params extends RequestOptions {
 export default async function main(req: Request): Promise<EnconvoResponse> {
     const options: Params = await req.json();
 
-    const { input_text, selection_text } = options;
+    const { input_text, selection_text, current_browser_tab } = options;
+    console.log({ input_text, selection_text, current_browser_tab })
 
-    let inputText = input_text || selection_text;
-
+    let inputText = input_text || selection_text || current_browser_tab?.url;
 
     if (!inputText) {
         throw new Error("No youtube video to be processed")
     }
 
-    const transcript = await YoutubeTranscript.fetchTranscript(inputText, {
-        lang: "en"
+    const result = await YoutubeLoader.load({
+        url: inputText,
+        with_timestamps: options.with_timestamps
     })
-    const result = transcript.reduce((acc, t, index) => {
-        const startTime = new Date(t.offset).toISOString().substr(11, 12).replace('.', ',');
-        const endTime = new Date(t.offset + t.duration).toISOString().substr(11, 12).replace('.', ',');
-        const srtEntry = options.with_timestamps
-            ? `${index + 1}\n${startTime} --> ${endTime}\n${t.text}\n\n`
-            : `${t.text}\n\n`;
-        return acc + srtEntry;
-    }, '').trim();
 
 
     const saveAsFileAction: ResponseAction = {

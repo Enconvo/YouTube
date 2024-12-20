@@ -27,6 +27,27 @@
         "selection_text": {
           "type": "string",
           "description": "The selected text to be processed"
+        },
+        "current_browser_tab": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The current browser tab url"
+            },
+            "title": {
+              "type": "string",
+              "description": "The current browser tab title"
+            },
+            "text": {
+              "type": "string",
+              "description": "The current browser tab text"
+            }
+          },
+          "description": "The current browser tab",
+          "required": [
+            "url"
+          ]
         }
       },
       "preferences": [
@@ -46,6 +67,82 @@
           "dataProxy": "youtube|languages"
         }
       ]
+    },
+    {
+      "name": "chat_with_youtube",
+      "title": "Chat With YouTube",
+      "description": "Chat with YouTube",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "aiPlugin": true,
+      "parameters": {
+        "input_text": {
+          "type": "string",
+          "description": "The text to be translated"
+        },
+        "selection_text": {
+          "type": "string",
+          "description": "The selection text to be translated"
+        },
+        "current_browser_tab": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The current browser tab url"
+            },
+            "title": {
+              "type": "string",
+              "description": "The current browser tab title"
+            },
+            "text": {
+              "type": "string",
+              "description": "The current browser tab text"
+            }
+          },
+          "description": "The current browser tab",
+          "required": [
+            "url"
+          ]
+        }
+      },
+      "preferences": [
+        {
+          "name": "llm",
+          "description": "The model used to generate responses",
+          "type": "extension",
+          "required": false,
+          "default": "default",
+          "title": "LLM Model"
+        },
+        {
+          "name": "auto_audio_play",
+          "description": "Automatically play result content",
+          "type": "checkbox",
+          "required": false,
+          "title": "Automatically Play TTS Audio",
+          "default": false
+        },
+        {
+          "name": "responseLanguage",
+          "description": "The language used to force LLM to respond",
+          "type": "dropdown",
+          "required": false,
+          "title": "Response Language",
+          "default": "auto",
+          "dataProxy": "translate|languages"
+        }
+      ]
+    },
+    {
+      "name": "summarize_youtube",
+      "title": "Summarize YouTube",
+      "description": "Summarize the content of the YouTube",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "aiPlugin": true,
+      "targetCommand": "youtube|chat_with_youtube",
+      "preferences": []
     },
     {
       "name": "languages",

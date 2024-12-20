@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "youtube_transcript_loader",
-      "title": "Youtube transcript loader",
+      "title": "Youtube Transcript Loader",
       "description": "get youtube transcript",
       "icon": "icon.png",
       "mode": "no-view",

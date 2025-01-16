@@ -1,4 +1,4 @@
-import { Browser, Action, res, language, RequestOptions, EnconvoResponse, ChatMessageContentSearchResultList, AssistantMessage, ChatMessageContentLoadingIndicator, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider } from "@enconvo/api";
+import { Browser, Action, res, language, RequestOptions, EnconvoResponse, AssistantMessage, ChatMessageContentLoadingIndicator, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider } from "@enconvo/api";
 import { humanPrompt, summary_template } from "./prompts.ts";
 import { YoutubeLoader } from "./youtube_loader.ts";
 
@@ -17,12 +17,10 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     query = input_text || selection_text;
 
     let messages: BaseChatMessage[] = []
-    let resultItemsMessage: ChatMessageContentSearchResultList = new ChatMessageContentSearchResultList([])
 
     if (new_session) {
-        const { messages: newMessages, resultItemsMessage: newResultItemsMessage } = await handleNewSession(options)
+        const { messages: newMessages } = await handleNewSession(options)
         messages = newMessages
-        resultItemsMessage = newResultItemsMessage
     } else {
         let LANGUAGE = "auto"
         console.log("query", query, webContent)
@@ -30,7 +28,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
         const humanTemplate = new StringTemplate(humanPrompt)
         const userMessagePrompt = humanTemplate.format({ LANGUAGE, input: query, sources: webContent })
 
-        messages = [...historyMessages, new UserMessage(userMessagePrompt)]
+        messages = [...(historyMessages || []), new UserMessage(userMessagePrompt)]
     }
 
     const combineModel = await LLMProvider.fromEnv()
@@ -52,7 +50,6 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
                 type: "text",
                 text: response
             },
-            resultItemsMessage
         ])],
         actions
     }
@@ -60,13 +57,15 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
 
 
 async function handleNewSession(options: RequestOptions) {
-    const { input_text, selection_text, current_browser_tab } = options
-    let query = input_text || selection_text || current_browser_tab?.url
+    const { question, input_text, selection_text, current_browser_tab, youtube_url } = options
+    let query = question || input_text || selection_text || current_browser_tab?.url
 
     let currentBrowserTab: Browser.BrowserTab | undefined
     const urlRegex = /((http|https):\/\/[^\s]+)/g;
     const isLink = selection_text && urlRegex.test(selection_text);
-    if (isLink) {
+    if (youtube_url) {
+        link = youtube_url
+    } else if (isLink) {
         link = selection_text;
     } else {
         const urlRegex = /((http|https):\/\/[^\s]+)/g;
@@ -95,28 +94,8 @@ async function handleNewSession(options: RequestOptions) {
         throw new Error("Unable to get a link")
     }
 
-    const url = new URL(link)
-    const host = url.host
-    const item = {
-        title: title || link,
-        user: host,
-        url: link,
-        icon: `https://www.google.com/s2/favicons?domain=${link}&sz=${128}`
-    }
 
-    const items = [item]
-
-    let resultItemsMessage = new ChatMessageContentSearchResultList(items)
-
-    const loadingMessage = new ChatMessageContentLoadingIndicator("Browsing the " + title)
-
-    res.write({
-        content: new AssistantMessage([
-            resultItemsMessage,
-            loadingMessage
-        ]),
-        action: res.WriteAction.OverwriteLastMessageAllContent,
-    })
+    res.writeLoading("Loading the subtitles")
 
     webContent = await YoutubeLoader.load({
         url: link
@@ -140,8 +119,7 @@ async function handleNewSession(options: RequestOptions) {
     const messages = [new UserMessage(userMessagePrompt)]
 
     return {
-        messages,
-        resultItemsMessage
+        messages
     }
 }
 

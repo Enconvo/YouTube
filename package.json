@@ -72,7 +72,7 @@
           "default": "en",
           "title": "Default language",
           "description": "Default language",
-          "dataProxy": "youtube|languages"
+          "dataProxy": "translate|languages"
         }
       ]
     },
@@ -178,7 +178,6 @@
   ],
   "dependencies": {
     "@enconvo/api": "^0.1.161",
-    "iso-639-1": "^3.1.3",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {

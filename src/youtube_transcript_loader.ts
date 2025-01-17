@@ -53,7 +53,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
         return text.slice(0, 500) + text.slice(-500) + `\n\n **result truncated, use [Copy] or [Paste] or [Save As ${options.with_timestamps ? "SRT" : "TXT"}] action to get full result**`;
     };
 
-    const showResult = truncateText(result);
+    const showResult = options.runType === "agent" ? result : truncateText(result);
     const output: EnconvoResponse = {
         type: "text",
         content: showResult,

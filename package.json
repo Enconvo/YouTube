@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "YouTube",
   "title": "Youtube",
   "icon": "icon.png",
@@ -67,9 +67,9 @@
           "description": "With timestamps"
         },
         {
-          "name": "default_language",
+          "name": "language",
           "type": "dropdown",
-          "default": "en",
+          "default": "auto",
           "title": "Default language",
           "description": "Default language",
           "dataProxy": "translate|languages"
@@ -172,6 +172,7 @@
       "description": "get language list",
       "icon": "straico.png",
       "showInCommandList": false,
+      "commandType": "function_command",
       "mode": "no-view",
       "preferences": []
     }

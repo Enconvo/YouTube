@@ -4,6 +4,9 @@ import { YoutubeLoader } from "./youtube_loader.ts";
 
 interface Params extends RequestOptions {
     with_timestamps: boolean;
+    language: {
+        value: string;
+    };
 }
 
 
@@ -21,7 +24,8 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
 
     const result = await YoutubeLoader.load({
         url: inputText,
-        with_timestamps: options.with_timestamps
+        with_timestamps: options.with_timestamps,
+        language: options.language.value
     })
 
 

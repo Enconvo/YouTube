@@ -1,14 +1,22 @@
-import { YoutubeTranscript } from "youtube-transcript";
+import { TranscriptConfig, YoutubeTranscript } from "youtube-transcript";
 
 export namespace YoutubeLoader {
 
-    export const load = async ({ url, with_timestamps = true }: {
+    export const load = async ({ url, with_timestamps = true, language }: {
         url: string,
         with_timestamps?: boolean
+        language?: string
     }) => {
-        const transcript = await YoutubeTranscript.fetchTranscript(url, {
-            lang: "en"
-        })
+
+        let config: TranscriptConfig | undefined = {
+            lang: language
+        }
+
+        if (language === "auto") {
+            config = undefined
+        }
+
+        const transcript = await YoutubeTranscript.fetchTranscript(url, config)
 
         const result = transcript.reduce((acc, t, index) => {
             const startTime = new Date(t.offset).toISOString().substr(11, 12).replace('.', ',');

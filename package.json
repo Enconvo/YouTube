@@ -1,8 +1,8 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.3",
-  "description": "YouTube",
+  "version": "0.0.4",
+  "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",
   "author": "Enconvo",
@@ -10,7 +10,7 @@
   "type": "module",
   "minAppVersion": "1.8.8",
   "categories": [
-    "Bot"
+    "Productivity"
   ],
   "commands": [
     {

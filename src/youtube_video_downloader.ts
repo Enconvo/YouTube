@@ -1,5 +1,4 @@
-import { getPythonEnv, getProjectEnv, RequestOptions, Response, res, uuid, BaseChatMessage, ChatMessageContent } from "@enconvo/api";
-import { spawn } from "child_process";
+import { RequestOptions, Response, res, uuid, BaseChatMessage, ChatMessageContent, runShellScript } from "@enconvo/api";
 import { homedir } from "os";
 import path from "path";
 import { unusedFilenameSync } from "unused-filename";
@@ -27,14 +26,14 @@ export default async function main(req: Request): Promise<Response> {
 
     options.youtube_url = youtubeUrl
 
-    const ytDlpVersion = await runShell({
+    const ytDlpVersion = await runShellScript({
         command: 'yt-dlp --version',
         useDefaultEnv: true
     })
     if (ytDlpVersion.code !== 0) {
         console.error('yt-dlp is not installed')
 
-        const installYtDlp = await runShell({
+        const installYtDlp = await runShellScript({
             command: 'uv pip install -U "yt-dlp[default]"',
             useDefaultEnv: true
         })
@@ -47,10 +46,11 @@ export default async function main(req: Request): Promise<Response> {
 
     res.writeLoading('Getting video Info...')
     // Get video title using yt-dlp to use as filename
-    const videoTitleResult = await runShell({
+    const videoTitleResult = await runShellScript({
         command: `yt-dlp --get-title ${options.youtube_url}`,
         useDefaultEnv: true
     });
+
     console.log('videoTitleResult', videoTitleResult);
     let videoTitle = ''
     if (videoTitleResult.code !== 0) {
@@ -62,7 +62,7 @@ export default async function main(req: Request): Promise<Response> {
     const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${sanitizeFilename(videoTitle)}${options.audio_only ? '.mp3' : '.mp4'}`));
 
     // download video
-    const downloadVideo = await runShell({
+    const downloadVideo = await runShellScript({
         // --no-overwrites: Do not overwrite existing files
         command: `yt-dlp -f mp4 -o "${downloadFilePath}" ${options.audio_only ? '-x --audio-format mp3' : ''} ${options.youtube_url}`,
         useDefaultEnv: true,
@@ -91,72 +91,4 @@ export default async function main(req: Request): Promise<Response> {
 
 }
 
-
-export interface RunShellParams {
-    command: string,
-    useDefaultEnv?: boolean,
-    onData?: (data: string) => void,
-    onError?: (data: string) => void,
-    onPrint?: (data: string) => void
-}
-
-export interface RunShellResult {
-    code: number,
-    output: string
-}
-
-export const runShell = async (params: RunShellParams): Promise<RunShellResult> => {
-    /**
- * set venv
- */
-    const venvPath = await getPythonEnv({ useDefaultEnv: params.useDefaultEnv || false })
-    console.log('venvPath1', venvPath);
-    let sourceVenv = ''
-    if (venvPath) {
-        sourceVenv = `source .venv/bin/activate && `
-    }
-    /**
-     * set project path
-     */
-    const projectPath = getProjectEnv({ useDefaultEnv: params.useDefaultEnv || false })
-
-
-    const command = `${sourceVenv} ${params.command}`;
-    console.log('command', command);
-
-    const child = spawn("/bin/bash", ['-c', command], {
-        cwd: projectPath
-    });
-
-    let output = '';
-    child.stdout.on('data', async (data) => {
-        const chunk = data.toString();
-        console.log("data:", chunk);
-        output += chunk;
-        params.onData?.(chunk)
-        params.onPrint?.(chunk)
-    });
-
-    child.stderr.on('data', (data) => {
-        const chunk = data.toString();
-        console.log("error data:", chunk);
-        console.error(chunk);
-        output += chunk;
-        params.onError?.(chunk)
-        params.onPrint?.(chunk)
-    });
-
-
-    const result = await new Promise<{ code: number, output: string }>((resolve, reject) => {
-        child.on('close', (code) => {
-            resolve({
-                code: code || 0,
-                output
-            });
-        });
-    });
-
-
-    return result
-}
 

@@ -39,8 +39,8 @@ export default async function main(req: Request): Promise<Response> {
         })
 
         if (installYtDlp.code !== 0) {
-            console.error('Failed to install yt-dlp')
-            throw new Error('Failed to install yt-dlp')
+            console.error('Failed to install yt-dlp,', installYtDlp.output)
+            throw new Error(`Failed to install yt-dlp  , ${installYtDlp.output}`)
         }
     }
 

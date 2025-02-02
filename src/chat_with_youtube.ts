@@ -1,5 +1,5 @@
-import { Browser, Action, res, language, RequestOptions, EnconvoResponse, AssistantMessage, ChatMessageContentLoadingIndicator, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider } from "@enconvo/api";
-import { humanPrompt, summary_template } from "./prompts.ts";
+import { Browser, Action, res, language, RequestOptions, Response, AssistantMessage, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider } from "@enconvo/api";
+import { humanPrompt, summary_template } from "./prompts/prompts.ts";
 import { YoutubeLoader } from "./youtube_loader.ts";
 
 
@@ -8,7 +8,7 @@ let link = '';
 let title = '';
 let webContent = ''
 
-export default async function main(req: Request): Promise<EnconvoResponse> {
+export default async function main(req: Request): Promise<Response> {
     let query;
 
     const options: RequestOptions = await req.json()
@@ -32,7 +32,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     }
 
     const combineModel = await LLMProvider.fromEnv()
-    const finalMessage = await combineModel.stream({ messages, autoHandle: true })
+    const finalMessage = await combineModel.stream({ messages })
 
     const response = finalMessage.text()
 
@@ -78,8 +78,8 @@ async function handleNewSession(options: RequestOptions) {
             title = current_browser_tab.title
         } else {
             currentBrowserTab = await Browser.currentTab()
-            link = currentBrowserTab?.url
-            title = currentBrowserTab?.title
+            link = currentBrowserTab?.url || ''
+            title = currentBrowserTab?.title || ''
         }
     }
 

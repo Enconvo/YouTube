@@ -167,18 +167,71 @@
       "preferences": []
     },
     {
-      "name": "languages",
-      "title": "Languages",
-      "description": "get language list",
-      "icon": "straico.png",
-      "showInCommandList": false,
-      "commandType": "function_command",
+      "name": "youtube_video_downloader",
+      "title": "Youtube Video Downloader",
+      "description": "Download the Youtube video",
       "mode": "no-view",
-      "preferences": []
+      "icon": "icon.png",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "input_text": {
+            "type": "string",
+            "description": "The text the user entered to interact with the youtube, can include youtube url"
+          },
+          "selection_text": {
+            "type": "string",
+            "description": "The selected text to be processed"
+          },
+          "current_browser_tab": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "The current browser tab url"
+              }
+            },
+            "description": "The current browser tab"
+          },
+          "youtube_url": {
+            "type": "string",
+            "description": "The youtube url to download"
+          },
+          "audio_only": {
+            "type": "boolean",
+            "description": "Whether to download only the audio, default is false"
+          },
+          "output_dir": {
+            "type": "string",
+            "description": "The directory to save the downloaded video, default is ~/Downloads"
+          }
+        },
+        "required": [
+          "youtube_url"
+        ]
+      },
+      "preferences": [
+        {
+          "name": "output_dir",
+          "type": "textfield",
+          "default": "~/Downloads",
+          "title": "Output Directory",
+          "description": "The directory to save the downloaded video"
+        },
+        {
+          "name": "audio_only",
+          "type": "checkbox",
+          "default": false,
+          "title": "Audio Only",
+          "description": "Whether to download only the audio, default is false"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@enconvo/api": "^0.1.161",
+    "unused-filename": "^4.0.1",
+    "sanitize-filename": "^1.6.3",
+    "@enconvo/api": "link:/Users/ysnows/Documents/Project/enconvo.nodejs/enconvo_api",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { Action, EnconvoResponse, Exporter, RequestOptions, ResponseAction } from "@enconvo/api";
+import { Action, Response ,Exporter, RequestOptions, ResponseAction } from "@enconvo/api";
 import fs from "fs";
 import { YoutubeLoader } from "./youtube_loader.ts";
 
@@ -10,7 +10,7 @@ interface Params extends RequestOptions {
 }
 
 
-export default async function main(req: Request): Promise<EnconvoResponse> {
+export default async function main(req: Request): Promise<Response> {
     const options: Params = await req.json();
 
     const { youtube_url, input_text, selection_text, current_browser_tab } = options;
@@ -58,7 +58,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     };
 
     const showResult = options.runType === "agent" ? result : truncateText(result);
-    const output: EnconvoResponse = {
+    const output: Response = {
         type: "text",
         content: showResult,
         actions: actions

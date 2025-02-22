@@ -86,7 +86,7 @@ export default async function main(req: Request): Promise<Response> {
     const actions: ResponseAction[] = [
         Action.Paste({ content: { files: [downloadFilePath] }, closeMainWindow: true }),
         Action.Copy({ content: { files: [downloadFilePath] } }),
-        Action.ShowInFinder({ path: downloadFilePath })
+        Action.ShowInFinder({ path: downloadFilePath, shortcut: { modifiers: ["cmd"], key: "return" } })
     ]
 
     return Response.messages(

@@ -1,4 +1,4 @@
-import { RequestOptions, Response, res, uuid, BaseChatMessage, ChatMessageContent, runShellScript } from "@enconvo/api";
+import { RequestOptions, Response, res, uuid, BaseChatMessage, ChatMessageContent, runShellScript, Action, ResponseAction } from "@enconvo/api";
 import { homedir } from "os";
 import path from "path";
 import { unusedFilenameSync } from "unused-filename";
@@ -82,11 +82,21 @@ export default async function main(req: Request): Promise<Response> {
     }
 
 
-    return Response.messages([
-        BaseChatMessage.assistant([
-            ChatMessageContent.video({ url: `file://${downloadFilePath}` })
-        ])
-    ])
+
+    const actions: ResponseAction[] = [
+        Action.Paste({ content: { files: [downloadFilePath] }, closeMainWindow: true }),
+        Action.Copy({ content: { files: [downloadFilePath] } }),
+        Action.ShowInFinder({ path: downloadFilePath })
+    ]
+
+    return Response.messages(
+        [
+            BaseChatMessage.assistant([
+                ChatMessageContent.video({ url: `file://${downloadFilePath}` })
+            ])
+        ],
+        actions
+    )
 
 
 }

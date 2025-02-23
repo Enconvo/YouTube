@@ -59,6 +59,9 @@ export default async function main(req: Request): Promise<Response> {
         videoTitle = videoTitleResult.output.trim()
     }
 
+    // max length 100
+    videoTitle = videoTitle.slice(0, 200)
+
     const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${sanitizeFilename(videoTitle)}${options.audio_only ? '.mp3' : '.mp4'}`));
 
     // download video

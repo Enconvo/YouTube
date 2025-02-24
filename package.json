@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",

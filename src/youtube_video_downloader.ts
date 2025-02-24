@@ -6,7 +6,7 @@ import sanitizeFilename from "sanitize-filename";
 
 
 interface DownloadVideoOptions extends RequestOptions {
-    youtube_url: string,
+    video_url: string,
     output_dir: string,
     audio_only: boolean
 }
@@ -19,12 +19,12 @@ export default async function main(req: Request): Promise<Response> {
     // Replace ~ with home directory path
     options.output_dir = options.output_dir.replace(/^~/, homedir())
 
-    const youtubeUrl = options.youtube_url || options.input_text || options.selection_text || options.current_browser_tab?.url
+    const youtubeUrl = options.video_url || options.input_text || options.selection_text || options.current_browser_tab?.url
     if (!youtubeUrl) {
         throw new Error("No youtube video to be processed")
     }
 
-    options.youtube_url = youtubeUrl
+    options.video_url = youtubeUrl
 
     const ytDlpVersion = await runShellScript({
         command: 'yt-dlp --version',
@@ -47,7 +47,7 @@ export default async function main(req: Request): Promise<Response> {
     res.writeLoading('Getting video Info...')
     // Get video title using yt-dlp to use as filename
     const videoTitleResult = await runShellScript({
-        command: `yt-dlp --get-title ${options.youtube_url}`,
+        command: `yt-dlp --get-title ${options.video_url}`,
         useDefaultEnv: true
     });
 
@@ -67,7 +67,7 @@ export default async function main(req: Request): Promise<Response> {
     // download video
     const downloadVideo = await runShellScript({
         // --no-overwrites: Do not overwrite existing files
-        command: `yt-dlp -f mp4 -o "${downloadFilePath}" ${options.audio_only ? '-x --audio-format mp3' : ''} ${options.youtube_url}`,
+        command: `yt-dlp -f mp4 -o "${downloadFilePath}" ${options.audio_only ? '-x --audio-format mp3' : ''} ${options.video_url}`,
         useDefaultEnv: true,
         onData: (data) => {
             console.log('downloadVideo', data)

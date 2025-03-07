@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.9",
+  "version": "0.0.12",
   "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",
@@ -170,6 +170,8 @@
       "name": "youtube_video_downloader",
       "title": "Youtube Video Downloader",
       "description": "Download the Youtube video",
+      "visibility": "hidden",
+      "commandType": "deprecated",
       "mode": "no-view",
       "icon": "icon.png",
       "parameters": {
@@ -197,6 +199,18 @@
             "type": "string",
             "description": "The video url to download"
           },
+          "favorite_resolution": {
+            "type": "number",
+            "description": "The favorite resolution to download, support 1080, 720, 480, 360, 240, 144, default is 720",
+            "enum": [
+              1080,
+              720,
+              480,
+              360,
+              240,
+              144
+            ]
+          },
           "audio_only": {
             "type": "boolean",
             "description": "Whether to download only the audio, default is false"
@@ -207,7 +221,8 @@
           }
         },
         "required": [
-          "youtube_url"
+          "video_url",
+          "favorite_resolution"
         ]
       },
       "preferences": [
@@ -230,6 +245,39 @@
               "default": false,
               "title": "Audio Only",
               "description": "Whether to download only the audio, default is false"
+            },
+            {
+              "name": "favorite_resolution",
+              "type": "dropdown",
+              "title": "Favorite Resolution",
+              "default": "720",
+              "description": "The favorite resolution to download, default is 720",
+              "data": [
+                {
+                  "title": "1080p",
+                  "value": 1080
+                },
+                {
+                  "title": "720p",
+                  "value": 720
+                },
+                {
+                  "title": "480p",
+                  "value": 480
+                },
+                {
+                  "title": "360p",
+                  "value": 360
+                },
+                {
+                  "title": "240p",
+                  "value": 240
+                },
+                {
+                  "title": "144p",
+                  "value": 144
+                }
+              ]
             }
           ]
         }

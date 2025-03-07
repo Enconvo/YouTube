@@ -1,0 +1,9 @@
+[project]
+name = "youtube"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "yt-dlp[default]>=2025.2.19",
+]

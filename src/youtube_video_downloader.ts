@@ -8,7 +8,10 @@ import sanitizeFilename from "sanitize-filename";
 interface DownloadVideoOptions extends RequestOptions {
     video_url: string,
     output_dir: string,
-    audio_only: boolean
+    audio_only: boolean,
+    favorite_resolution: number | {
+        value: 1080 | 720 | 480 | 360 | 240 | 144
+    }
 }
 
 
@@ -25,6 +28,7 @@ export default async function main(req: Request): Promise<Response> {
     }
 
     options.video_url = youtubeUrl
+
 
     const ytDlpVersion = await runShellScript({
         command: 'yt-dlp --version',
@@ -62,12 +66,21 @@ export default async function main(req: Request): Promise<Response> {
     // max length 100
     videoTitle = videoTitle.slice(0, 200)
 
-    const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${sanitizeFilename(videoTitle)}${options.audio_only ? '.mp3' : '.mp4'}`));
+    const favoriteResolution = typeof options.favorite_resolution === 'number' ? options.favorite_resolution : options.favorite_resolution.value
+    // Set format code to ensure mp4 format
+    const formatCode = `bestvideo[ext=mp4][height<=${favoriteResolution}]+bestaudio[ext=m4a]/best[ext=mp4][height<=${favoriteResolution}]`;
+    console.log('formatCode', formatCode)
 
-    // download video
+    // Set download file path with .mp4 extension
+    const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${sanitizeFilename(videoTitle)}.mp4`));
+
+    // Download video with specified format code
+    const command = `yt-dlp -f '${formatCode}' -o "${downloadFilePath}" ${options.video_url}`
+    console.log('command', command)
     const downloadVideo = await runShellScript({
         // --no-overwrites: Do not overwrite existing files
-        command: `yt-dlp -f mp4 -o "${downloadFilePath}" ${options.audio_only ? '-x --audio-format mp3' : ''} ${options.video_url}`,
+        // Set the resolution to 720p by specifying the format code 'bestvideo[height<=720]+bestaudio/best[height<=720]'
+        command: command,
         useDefaultEnv: true,
         onData: (data) => {
             console.log('downloadVideo', data)

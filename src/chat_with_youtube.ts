@@ -45,12 +45,7 @@ export default async function main(req: Request): Promise<Response> {
 
     return {
         type: "messages",
-        messages: [new AssistantMessage([
-            {
-                type: "text",
-                text: response
-            },
-        ])],
+        messages: [finalMessage],
         actions
     }
 }

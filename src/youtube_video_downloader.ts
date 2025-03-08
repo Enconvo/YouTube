@@ -9,8 +9,8 @@ interface DownloadVideoOptions extends RequestOptions {
     video_url: string,
     output_dir: string,
     audio_only: boolean,
-    favorite_resolution: number | {
-        value: 1080 | 720 | 480 | 360 | 240 | 144
+    favorite_resolution: string | {
+        value: "1080" | "720" | "480" | "360" | "240" | "144"
     }
 }
 
@@ -66,9 +66,10 @@ export default async function main(req: Request): Promise<Response> {
     // max length 100
     videoTitle = videoTitle.slice(0, 200)
 
-    const favoriteResolution = typeof options.favorite_resolution === 'number' ? options.favorite_resolution : options.favorite_resolution.value
+    const favoriteResolution = typeof options.favorite_resolution === 'string' ? options.favorite_resolution : options.favorite_resolution.value
+    const favoriteResolutionNumber = parseInt(favoriteResolution)
     // Set format code to ensure mp4 format
-    const formatCode = `bestvideo[ext=mp4][height<=${favoriteResolution}]+bestaudio[ext=m4a]/best[ext=mp4][height<=${favoriteResolution}]`;
+    const formatCode = `bestvideo[ext=mp4][height<=${favoriteResolutionNumber}]+bestaudio[ext=m4a]/best[ext=mp4][height<=${favoriteResolutionNumber}]`;
     console.log('formatCode', formatCode)
 
     // Set download file path with .mp4 extension

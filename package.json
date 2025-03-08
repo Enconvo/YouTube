@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",
@@ -200,15 +200,15 @@
             "description": "The video url to download"
           },
           "favorite_resolution": {
-            "type": "number",
+            "type": "string",
             "description": "The favorite resolution to download, support 1080, 720, 480, 360, 240, 144, default is 720",
             "enum": [
-              1080,
-              720,
-              480,
-              360,
-              240,
-              144
+              "1080",
+              "720",
+              "480",
+              "360",
+              "240",
+              "144"
             ]
           },
           "audio_only": {
@@ -255,27 +255,27 @@
               "data": [
                 {
                   "title": "1080p",
-                  "value": 1080
+                  "value": "1080"
                 },
                 {
                   "title": "720p",
-                  "value": 720
+                  "value": "720"
                 },
                 {
                   "title": "480p",
-                  "value": 480
+                  "value": "480"
                 },
                 {
                   "title": "360p",
-                  "value": 360
+                  "value": "360"
                 },
                 {
                   "title": "240p",
-                  "value": 240
+                  "value": "240"
                 },
                 {
                   "title": "144p",
-                  "value": 144
+                  "value": "144"
                 }
               ]
             }

@@ -11,6 +11,10 @@ interface DownloadVideoOptions extends RequestOptions {
     audio_only: boolean,
     favorite_resolution: string | {
         value: "1080" | "720" | "480" | "360" | "240" | "144"
+    },
+    use_cookies: boolean,
+    browser_type: {
+        value: string
     }
 }
 
@@ -29,6 +33,8 @@ export default async function main(req: Request): Promise<Response> {
 
     options.video_url = youtubeUrl
 
+
+    const useCookieCommand = options.use_cookies ? `--cookies-from-browser ${options.browser_type.value}` : ''
 
     const ytDlpVersion = await runShellScript({
         command: 'yt-dlp --version',
@@ -51,7 +57,7 @@ export default async function main(req: Request): Promise<Response> {
     res.writeLoading('Getting video Info...')
     // Get video title using yt-dlp to use as filename
     const videoTitleResult = await runShellScript({
-        command: `yt-dlp --get-title ${options.video_url}`,
+        command: `yt-dlp ${useCookieCommand} --get-title  ${options.video_url}`,
         useDefaultEnv: true
     });
 
@@ -69,14 +75,15 @@ export default async function main(req: Request): Promise<Response> {
     const favoriteResolution = typeof options.favorite_resolution === 'string' ? options.favorite_resolution : options.favorite_resolution.value
     const favoriteResolutionNumber = parseInt(favoriteResolution)
     // Set format code to ensure mp4 format
-    const formatCode = `bestvideo[ext=mp4][height<=${favoriteResolutionNumber}]+bestaudio[ext=m4a]/best[ext=mp4][height<=${favoriteResolutionNumber}]`;
+    const isYoutube = options.video_url.includes('youtube.com')
+    const formatCode = isYoutube ? `bestvideo[ext=mp4][height<=${favoriteResolutionNumber}]+bestaudio[ext=m4a]/best[ext=mp4][height<=${favoriteResolutionNumber}]` : 'mp4'
     console.log('formatCode', formatCode)
 
     // Set download file path with .mp4 extension
     const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${sanitizeFilename(videoTitle)}.mp4`));
 
     // Download video with specified format code
-    const command = `yt-dlp -f '${formatCode}' -o "${downloadFilePath}" ${options.video_url}`
+    const command = `yt-dlp  ${useCookieCommand} -f '${formatCode}' -o "${downloadFilePath}"  ${options.video_url}`
     console.log('command', command)
     const downloadVideo = await runShellScript({
         // --no-overwrites: Do not overwrite existing files

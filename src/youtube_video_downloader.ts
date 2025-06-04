@@ -3,6 +3,7 @@ import { homedir } from "os";
 import path from "path";
 import { unusedFilenameSync } from "unused-filename";
 import sanitizeFilename from "sanitize-filename";
+import { url } from "inspector";
 
 
 interface DownloadVideoOptions extends RequestOptions {
@@ -56,19 +57,12 @@ export default async function main(req: Request): Promise<Response> {
 
     res.writeLoading('Getting video Info...')
     // Get video title using yt-dlp to use as filename
-    const videoTitleResult = await runShellScript({
-        command: `yt-dlp ${useCookieCommand} --get-title  ${options.video_url}`,
-        useDefaultEnv: true
-    });
 
-    console.log('videoTitleResult', videoTitleResult);
-    let videoTitle = ''
-    if (videoTitleResult.code !== 0) {
-        videoTitle = uuid()
-    } else {
-        videoTitle = videoTitleResult.output.trim()
-    }
+    let videoTitle = youtubeUrl.trim().replace(/\s+/g, '_')
 
+    // remove all non-alphanumeric characters
+    videoTitle = videoTitle.replace(/[^a-zA-Z0-9]/g, '')
+    videoTitle = sanitizeFilename(videoTitle)
     // max length 100
     videoTitle = videoTitle.slice(0, 200)
 
@@ -80,7 +74,7 @@ export default async function main(req: Request): Promise<Response> {
     console.log('formatCode', formatCode)
 
     // Set download file path with .mp4 extension
-    const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${sanitizeFilename(videoTitle)}.mp4`));
+    const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${videoTitle}.mp4`));
 
     // Download video with specified format code
     const command = `yt-dlp  ${useCookieCommand} -f '${formatCode}' -o "${downloadFilePath}"  ${options.video_url}`

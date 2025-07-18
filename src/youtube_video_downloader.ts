@@ -1,9 +1,10 @@
-import { RequestOptions, Response, res, uuid, BaseChatMessage, ChatMessageContent, runShellScript, Action, ResponseAction } from "@enconvo/api";
+import { RequestOptions, res, ChatMessageContent, Action, ResponseAction, EnconvoResponse } from "@enconvo/api";
 import { homedir } from "os";
 import path from "path";
 import { unusedFilenameSync } from "unused-filename";
 import sanitizeFilename from "sanitize-filename";
-import { url } from "inspector";
+import { runProjectShellScript } from "./utils/python_utils.ts";
+import { getVideoInfo } from "./utils/video.ts";
 
 
 interface DownloadVideoOptions extends RequestOptions {
@@ -20,8 +21,10 @@ interface DownloadVideoOptions extends RequestOptions {
 }
 
 
-export default async function main(req: Request): Promise<Response> {
+export default async function main(req: Request): Promise<EnconvoResponse> {
+
     const options: DownloadVideoOptions = await req.json()
+
     // Set default output directory to ~/Downloads if not specified or empty
     options.output_dir = options.output_dir?.trim() || `${homedir()}/Downloads`
     // Replace ~ with home directory path
@@ -33,60 +36,32 @@ export default async function main(req: Request): Promise<Response> {
     }
 
     options.video_url = youtubeUrl
+    res.writeLoading('Getting video info...')
 
+    const videoInfo = await getVideoInfo(options.video_url)
 
     const useCookieCommand = options.use_cookies ? `--cookies-from-browser ${options.browser_type.value}` : ''
 
-    const ytDlpVersion = await runShellScript({
-        command: 'yt-dlp --version',
-        useDefaultEnv: true
-    })
-    if (ytDlpVersion.code !== 0) {
-        console.error('yt-dlp is not installed')
+    let videoTitle = videoInfo.id
 
-        const installYtDlp = await runShellScript({
-            command: 'uv pip install -U "yt-dlp[default]"',
-            useDefaultEnv: true
-        })
-
-        if (installYtDlp.code !== 0) {
-            console.error('Failed to install yt-dlp,', installYtDlp.output)
-            throw new Error(`Failed to install yt-dlp  , ${installYtDlp.output}`)
-        }
-    }
-
-    res.writeLoading('Getting video Info...')
-    // Get video title using yt-dlp to use as filename
-
-    let videoTitle = youtubeUrl.trim().replace(/\s+/g, '_')
-
-    // remove all non-alphanumeric characters
-    videoTitle = videoTitle.replace(/[^a-zA-Z0-9]/g, '')
     videoTitle = sanitizeFilename(videoTitle)
-    // max length 100
-    videoTitle = videoTitle.slice(0, 200)
 
     const favoriteResolution = typeof options.favorite_resolution === 'string' ? options.favorite_resolution : options.favorite_resolution.value
-    const favoriteResolutionNumber = parseInt(favoriteResolution)
-    // Set format code to ensure mp4 format
-    const isYoutube = options.video_url.includes('youtube.com')
-    const formatCode = isYoutube ? `bestvideo[ext=mp4][height<=${favoriteResolutionNumber}]+bestaudio[ext=m4a]/best[ext=mp4][height<=${favoriteResolutionNumber}]` : 'mp4'
-    console.log('formatCode', formatCode)
+
+    // Prioritize downloading videos with format_note matching favoriteResolution
+    const formatCode = `bv*[format_note*=${favoriteResolution}][ext=mp4]+ba[ext=m4a]/bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*[format_note*=${favoriteResolution}]+ba/bv*+ba/b`
 
     // Set download file path with .mp4 extension
     const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${videoTitle}.mp4`));
 
-    // Download video with specified format code
-    const command = `yt-dlp  ${useCookieCommand} -f '${formatCode}' -o "${downloadFilePath}"  ${options.video_url}`
-    console.log('command', command)
-    const downloadVideo = await runShellScript({
-        // --no-overwrites: Do not overwrite existing files
-        // Set the resolution to 720p by specifying the format code 'bestvideo[height<=720]+bestaudio/best[height<=720]'
+    // Build yt-dlp command with format conversion to mp4
+    // --merge-output-format mp4: Ensure final output is mp4 format
+    // --recode-video mp4: Convert video to mp4 if needed
+    const command = `yt-dlp ${useCookieCommand} -f '${formatCode}' --merge-output-format mp4 --recode-video mp4 -o "${downloadFilePath}" ${options.video_url}`
+    const downloadVideo = await runProjectShellScript({
         command: command,
-        useDefaultEnv: true,
+        activeVenv: true,
         onData: (data) => {
-            console.log('downloadVideo', data)
-
             const chunk = data.trim()
             if (chunk) {
                 res.writeLoading(chunk)
@@ -107,11 +82,9 @@ export default async function main(req: Request): Promise<Response> {
         Action.ShowInFinder({ path: downloadFilePath, shortcut: { modifiers: ["cmd"], key: "return" } })
     ]
 
-    return Response.messages(
+    return EnconvoResponse.content(
         [
-            BaseChatMessage.assistant([
-                ChatMessageContent.video({ url: `file://${downloadFilePath}` })
-            ])
+            ChatMessageContent.video({ url: `file://${downloadFilePath}` })
         ],
         actions
     )

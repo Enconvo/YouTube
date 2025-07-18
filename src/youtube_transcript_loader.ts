@@ -9,7 +9,6 @@ interface Params extends RequestOptions {
     };
 }
 
-
 export default async function main(req: Request): Promise<Response> {
     const options: Params = await req.json();
 

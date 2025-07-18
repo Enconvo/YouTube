@@ -348,7 +348,7 @@
     "unused-filename": "^4.0.1",
     "sanitize-filename": "^1.6.3",
     "@enconvo/api": "link:/Users/ysnows/Documents/Project/enconvo.nodejs/enconvo_api",
-    "youtube-transcript": "^1.2.1"
+    "youtube-transcript": "link:./youtube-transcript"
   },
   "devDependencies": {
     "@types/node": "^18.19.33",

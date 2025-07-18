@@ -1,7 +1,14 @@
 import { homedir } from "os"
 import { runProjectPythonScript } from "./python_utils.ts"
 
-interface VideoInfo {
+export interface SubtitleInfo {
+    url: string, // Caption file URL
+    ext: string, // File extension (e.g., "vtt", "srt", "json3")
+    protocol?: string, // Protocol type (e.g., "m3u8_native")
+    name?: string, // Language name (e.g., "English (United States)")
+    __yt_dlp_client?: string, // YouTube DLP client identifier
+}
+export interface VideoInfo {
     id: string,
     title: string,
     formats: {
@@ -19,23 +26,11 @@ interface VideoInfo {
         resolution?: string, // Optional resolution string (e.g., "1920x1080")
     }[], // Array of available thumbnail images
 
-    automatic_captions?: {
-        [key: string]: {
-            url: string, // Caption file URL
-            ext: string, // File extension (e.g., "vtt", "srt", "json3")
-            protocol?: string, // Protocol type (e.g., "m3u8_native")
-            name?: string, // Language name (e.g., "English (United States)")
-            __yt_dlp_client?: string, // YouTube DLP client identifier
-        }[]
+    automatic_captions: {
+        [key: string]: SubtitleInfo[]
     },
-    subtitles?: {
-        [key: string]: {
-            url: string, // Caption file URL
-            ext: string, // File extension (e.g., "vtt", "srt", "json3")
-            protocol?: string, // Protocol type (e.g., "m3u8_native")
-            name?: string, // Language name (e.g., "English (United States)")
-            __yt_dlp_client?: string, // YouTube DLP client identifier
-        }[]
+    subtitles: {
+        [key: string]: SubtitleInfo[]
     },
 
     description: string, // Video description text

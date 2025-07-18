@@ -35,6 +35,16 @@
             "type": "string",
             "description": "The youtube url to be processed"
           },
+          "with_timestamps": {
+            "type": "boolean",
+            "description": "Whether to include timestamps in the transcript",
+            "default": true
+          },
+          "language": {
+            "type": "string",
+            "description": "The language code of the transcript, ISO 639-1",
+            "default": "auto"
+          },
           "current_browser_tab": {
             "type": "object",
             "properties": {
@@ -345,10 +355,10 @@
     }
   ],
   "dependencies": {
-    "unused-filename": "^4.0.1",
-    "sanitize-filename": "^1.6.3",
     "@enconvo/api": "link:/Users/ysnows/Documents/Project/enconvo.nodejs/enconvo_api",
-    "youtube-transcript": "link:./youtube-transcript"
+    "axios": "^1.10.0",
+    "sanitize-filename": "^1.6.3",
+    "unused-filename": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^18.19.33",

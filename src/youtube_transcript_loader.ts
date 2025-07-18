@@ -1,10 +1,10 @@
-import { Action, Response ,Exporter, RequestOptions, ResponseAction } from "@enconvo/api";
+import { Action, Exporter, RequestOptions, ResponseAction, res, EnconvoResponse } from "@enconvo/api";
 import fs from "fs";
-import { YoutubeLoader } from "./youtube_loader.ts";
+import { TranscriptLoader } from "./utils/transcript_loader.ts";
 
 interface Params extends RequestOptions {
     with_timestamps: boolean;
-    language: {
+    language: string | {
         value: string;
     };
 }
@@ -21,10 +21,11 @@ export default async function main(req: Request): Promise<Response> {
         throw new Error("No youtube video to be processed")
     }
 
-    const result = await YoutubeLoader.load({
+    res.writeLoading('Getting transcript...')
+    const result = await TranscriptLoader.load({
         url: inputText,
         with_timestamps: options.with_timestamps,
-        language: options.language.value
+        language: typeof options.language === "string" ? options.language : options.language.value
     })
 
 
@@ -57,7 +58,7 @@ export default async function main(req: Request): Promise<Response> {
     };
 
     const showResult = options.runType === "agent" ? result : truncateText(result);
-    const output: Response = {
+    const output: EnconvoResponse = {
         type: "text",
         content: showResult,
         actions: actions

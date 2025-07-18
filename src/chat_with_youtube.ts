@@ -1,6 +1,6 @@
 import { Browser, Action, res, language, RequestOptions, Response, AssistantMessage, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider } from "@enconvo/api";
 import { humanPrompt, summary_template } from "./prompts/prompts.ts";
-import { YoutubeLoader } from "./youtube_loader.ts";
+import { TranscriptLoader } from "./utils/transcript_loader.ts";
 
 
 
@@ -92,7 +92,7 @@ async function handleNewSession(options: RequestOptions) {
 
     res.writeLoading("Loading the subtitles")
 
-    webContent = await YoutubeLoader.load({
+    webContent = await TranscriptLoader.load({
         url: link
     })
 

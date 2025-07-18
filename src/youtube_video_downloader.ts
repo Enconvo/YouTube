@@ -51,16 +51,15 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     // Prioritize downloading videos with format_note matching favoriteResolution
     // --merge-output-format mp4 --recode-video mp4
     // Build format selector based on favorite resolution preference
-    const formatCode = favoriteResolution === 'best' ? '' : `-f bv*[format_note*=${favoriteResolution}]+ba/bv*+ba/b`
+    const formatCode = favoriteResolution === 'best' ? '' : `-f bv*[vcodec^=avc1][format_note*=${favoriteResolution}][ext=mp4]+ba/bv*[format_note*=${favoriteResolution}]+ba/bv*+ba/b`
 
     // Set download file path with .mp4 extension
     const downloadFileName = path.join(options.output_dir, `${videoTitle}`)
     const downloadFilePath = unusedFilenameSync(downloadFileName + '.mp4');
 
-    // Build yt-dlp command with format conversion to mp4
-    // --merge-output-format mp4: Ensure final output is mp4 format
-    // --recode-video mp4: Convert video to mp4 if needed
-    const command = `yt-dlp ${useCookieCommand} ${formatCode}  -o "${downloadFileName}" ${options.video_url}`
+    // Build yt-dlp command with QuickTime-compatible encoding
+    // --postprocessor-args: Force H.264 video and AAC audio encoding for QuickTime compatibility
+    const command = `yt-dlp ${useCookieCommand} ${formatCode} --recode-video mp4  -o "${downloadFileName}" ${options.video_url}`
     console.log("command", command)
     const downloadVideo = await runProjectShellScript({
         command: command,
@@ -90,6 +89,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
         [
             ChatMessageContent.video({ url: `file://${downloadFilePath}` })
         ],
+        false,
         actions
     )
 

@@ -12,7 +12,7 @@ interface DownloadVideoOptions extends RequestOptions {
     output_dir: string,
     audio_only: boolean,
     favorite_resolution: string | {
-        value: "1080" | "720" | "480" | "360" | "240" | "144"
+        value: "best" | "1080" | "720" | "480" | "360" | "240" | "144"
     },
     use_cookies: boolean,
     browser_type: {
@@ -49,15 +49,19 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     const favoriteResolution = typeof options.favorite_resolution === 'string' ? options.favorite_resolution : options.favorite_resolution.value
 
     // Prioritize downloading videos with format_note matching favoriteResolution
-    const formatCode = `bv*[format_note*=${favoriteResolution}][ext=mp4]+ba[ext=m4a]/bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*[format_note*=${favoriteResolution}]+ba/bv*+ba/b`
+    // --merge-output-format mp4 --recode-video mp4
+    // Build format selector based on favorite resolution preference
+    const formatCode = favoriteResolution === 'best' ? '' : `-f bv*[format_note*=${favoriteResolution}]+ba/bv*+ba/b`
 
     // Set download file path with .mp4 extension
-    const downloadFilePath = unusedFilenameSync(path.join(options.output_dir, `${videoTitle}.mp4`));
+    const downloadFileName = path.join(options.output_dir, `${videoTitle}`)
+    const downloadFilePath = unusedFilenameSync(downloadFileName + '.mp4');
 
     // Build yt-dlp command with format conversion to mp4
     // --merge-output-format mp4: Ensure final output is mp4 format
     // --recode-video mp4: Convert video to mp4 if needed
-    const command = `yt-dlp ${useCookieCommand} -f '${formatCode}' --merge-output-format mp4 --recode-video mp4 -o "${downloadFilePath}" ${options.video_url}`
+    const command = `yt-dlp ${useCookieCommand} ${formatCode}  -o "${downloadFileName}" ${options.video_url}`
+    console.log("command", command)
     const downloadVideo = await runProjectShellScript({
         command: command,
         activeVenv: true,

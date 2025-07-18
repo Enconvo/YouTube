@@ -159,7 +159,7 @@ export async function getVideoInfo(url: string): Promise<VideoInfo> {
         console.error('Failed to extract video info', result)
         throw new Error(`Failed to extract video info, ${result.output}`)
     }
-    require('fs').writeFileSync(`${homedir()}/Downloads/result.json`, result.output)
+    // require('fs').writeFileSync(`${homedir()}/Downloads/result.json`, result.output)
 
     let videoInfo: VideoInfo
     try {

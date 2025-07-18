@@ -9,24 +9,29 @@ export namespace TranscriptLoader {
         language?: string
     }) => {
 
-
         console.log("url", url, language)
 
         const videoInfo = await getVideoInfo(url)
         let subTitleInfo: SubtitleInfo | undefined
+        let languageCode = 'en'
         const ext = with_timestamps ? 'srt' : 'json3'
         if (language === 'auto') {
-            const subtitles = Object.values(videoInfo.subtitles)
+            const subtitles = Object.entries(videoInfo.subtitles)
             if (subtitles.length > 0) {
-                subTitleInfo = subtitles[0].find(caption => caption.ext === ext)
+                const [language, captions] = subtitles[0]
+                subTitleInfo = captions.find(caption => caption.ext === ext)
+                languageCode = language
             } else {
                 const enCaptions = videoInfo.automatic_captions["en"]
                 if (enCaptions) {
                     subTitleInfo = enCaptions.find(caption => caption.ext === ext)
+                    languageCode = 'en'
                 } else {
-                    const automatic_captions = Object.values(videoInfo.automatic_captions)
+                    const automatic_captions = Object.entries(videoInfo.automatic_captions)
                     if (automatic_captions.length > 0) {
-                        subTitleInfo = automatic_captions[0].find(caption => caption.ext === ext)
+                        const [language, captions] = automatic_captions[0]
+                        subTitleInfo = captions.find(caption => caption.ext === ext)
+                        languageCode = language
                     }
                 }
             }
@@ -34,10 +39,12 @@ export namespace TranscriptLoader {
             const subtitles = videoInfo.subtitles[language]
             if (subtitles) {
                 subTitleInfo = subtitles.find(caption => caption.ext === ext)
+                languageCode = language
             } else {
                 const enCaptions = videoInfo.automatic_captions[language]
                 if (enCaptions) {
                     subTitleInfo = enCaptions.find(caption => caption.ext === ext)
+                    languageCode = language
                 }
             }
         }
@@ -62,8 +69,15 @@ export namespace TranscriptLoader {
 
         let text = response.data
         if (with_timestamps) {
-            return text
+            return {
+                transcript: text,
+                language: languageCode,
+                title: videoInfo.title,
+                description: videoInfo.description
+            }
         }
+
+
         const jsonData: {
             events: {
                 tStartMs: number
@@ -82,7 +96,12 @@ export namespace TranscriptLoader {
             }).join(' ')
         }).join('\n')
 
-        return eventsWithoutTimestamps
+        return {
+            transcript: eventsWithoutTimestamps,
+            language: languageCode,
+            title: videoInfo.title,
+            description: videoInfo.description
+        }
     }
 
 

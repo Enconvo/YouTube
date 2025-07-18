@@ -58,10 +58,16 @@ export const runProjectShellScript = async (params: RunProjectShellScriptParams)
     });
 
     let output = '';
+    let startOutputResult = false
     child.stdout.on('data', async (data) => {
         const chunk = data.toString();
-        // console.log("data:", chunk);
-        output += chunk;
+        if (chunk.startsWith("enconvo://python.result")) {
+            startOutputResult = true
+            const result = chunk.split("enconvo://python.result")[1]
+            output = result
+        } else if (startOutputResult) {
+            output += chunk
+        }
         params.onData?.(chunk)
         params.onPrint?.(chunk)
     });

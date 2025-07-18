@@ -1,4 +1,4 @@
-import { Browser, Action, res, language, RequestOptions, Response, AssistantMessage, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider } from "@enconvo/api";
+import { Browser, Action, res, RequestOptions, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider, EnconvoResponse } from "@enconvo/api";
 import { humanPrompt, summary_template } from "./prompts/prompts.ts";
 import { TranscriptLoader } from "./utils/transcript_loader.ts";
 
@@ -8,7 +8,7 @@ let link = '';
 let title = '';
 let webContent = ''
 
-export default async function main(req: Request): Promise<Response> {
+export default async function main(req: Request): Promise<EnconvoResponse> {
     let query;
 
     const options: RequestOptions = await req.json()
@@ -22,14 +22,14 @@ export default async function main(req: Request): Promise<Response> {
         const { messages: newMessages } = await handleNewSession(options)
         messages = newMessages
     } else {
-        let LANGUAGE = "auto"
         console.log("query", query, webContent)
 
         const humanTemplate = new StringTemplate(humanPrompt)
-        const userMessagePrompt = humanTemplate.format({ LANGUAGE, input: query, sources: webContent })
+        const userMessagePrompt = humanTemplate.format({ input: query, sources: webContent })
 
         messages = [...(historyMessages || []), new UserMessage(userMessagePrompt)]
     }
+    console.log("messages", JSON.stringify(messages, null, 2))
 
     const combineModel = await LLMProvider.fromEnv()
     const finalMessage = await combineModel.stream({ messages })
@@ -43,11 +43,7 @@ export default async function main(req: Request): Promise<Response> {
     ]
 
 
-    return {
-        type: "messages",
-        messages: [finalMessage],
-        actions
-    }
+    return EnconvoResponse.messages([finalMessage], actions)
 }
 
 
@@ -92,25 +88,17 @@ async function handleNewSession(options: RequestOptions) {
 
     res.writeLoading("Loading the subtitles")
 
-    webContent = await TranscriptLoader.load({
+    const { transcript } = await TranscriptLoader.load({
         url: link
     })
 
-    let LANGUAGE = "english"
+    webContent = transcript
 
-    if (options.responseLanguage?.value === "auto") {
-        const detectContent = isSummarize ? webContent.slice(0, 100) : query
-        LANGUAGE = await language.detect(detectContent)
-    } else {
-        LANGUAGE = options.responseLanguage?.title
-    }
-
-    console.log("language", LANGUAGE, options.responseLanguage, webContent)
-
+    console.log("transcript", transcript.slice(0, 100), isSummarize)
     await res.writeLoading("Thinking...")
 
     const humanTemplate = new StringTemplate(isSummarize ? summary_template : humanPrompt)
-    const userMessagePrompt = humanTemplate.format({ LANGUAGE, input: query, sources: webContent })
+    const userMessagePrompt = humanTemplate.format({ input: query, sources: transcript })
     const messages = [new UserMessage(userMessagePrompt)]
 
     return {

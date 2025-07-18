@@ -35,7 +35,7 @@ def main():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             # Extract video information without downloading (equivalent to -J flag)
             info = ydl.extract_info(url, download=False)
-            print(json.dumps(info, indent=2))
+            print("enconvo://python.result" + json.dumps(info, indent=2))
 
     except Exception as e:
         print(f"Error extracting video information: {str(e)}")

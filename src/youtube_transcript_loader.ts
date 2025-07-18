@@ -29,6 +29,10 @@ export default async function main(req: Request): Promise<Response> {
     })
 
 
+    if (options.runType === 'api' || options.runType === 'agent' || options.runType === 'flow') {
+        return Response.json(result)
+    }
+
     const saveAsFileAction: ResponseAction = {
         title: `Save As ${options.with_timestamps ? "SRT" : "TXT"}`,
         icon: "sf:headphones.circle",
@@ -40,24 +44,26 @@ export default async function main(req: Request): Promise<Response> {
             });
 
             if (destination) {
-                fs.writeFileSync(destination, result);
+                fs.writeFileSync(destination, result.transcript);
             }
 
         }
     }
 
+
+
     const actions: ResponseAction[] = [
-        Action.Paste({ content: result }),
+        Action.Paste({ content: result.transcript }),
         saveAsFileAction,
-        Action.Copy({ content: result })
+        Action.Copy({ content: result.transcript })
     ]
 
     const truncateText = (text: string): string => {
         if (text.length <= 1000) return text;
-        return text.slice(0, 500) + text.slice(-500) + `\n\n **result truncated, use [Copy] or [Paste] or [Save As ${options.with_timestamps ? "SRT" : "TXT"}] action to get full result**`;
+        return text.slice(0, 800) + text.slice(-800) + `\n\n **result truncated, use [Copy] or [Paste] or [Save As ${options.with_timestamps ? "SRT" : "TXT"}] action to get full result**`;
     };
 
-    const showResult = options.runType === "agent" ? result : truncateText(result);
+    const showResult = truncateText(result.transcript);
     const output: EnconvoResponse = {
         type: "text",
         content: showResult,

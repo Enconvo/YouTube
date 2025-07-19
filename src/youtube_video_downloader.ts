@@ -51,15 +51,19 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     // Prioritize downloading videos with format_note matching favoriteResolution
     // --merge-output-format mp4 --recode-video mp4
     // Build format selector based on favorite resolution preference
-    const formatCode = favoriteResolution === 'best' ? '' : `-f bv*[vcodec^=avc1][format_note*=${favoriteResolution}][ext=mp4]+ba/bv*[format_note*=${favoriteResolution}]+ba/bv*+ba/b`
+    // Build format selector to ensure MP4 output format
+    // Prioritize H.264 video codec with AAC audio for maximum compatibility
+    const formatCode = options.audio_only ? `-f ba[ext=m4a]/ba[acodec^=mp3]/ba/b` : favoriteResolution === 'best'
+        ? '-f bv*[vcodec^=avc1][ext=mp4]+ba[ext=m4a]/bv*[ext=mp4]+ba/b[ext=mp4]/b'
+        : `-f bv*[vcodec^=avc1][format_note*=${favoriteResolution}][ext=mp4]+ba[ext=m4a]/bv*[format_note*=${favoriteResolution}][ext=mp4]+ba/bv*[ext=mp4]+ba/b[ext=mp4]/b`
 
     // Set download file path with .mp4 extension
     const downloadFileName = path.join(options.output_dir, `${videoTitle}`)
-    const downloadFilePath = unusedFilenameSync(downloadFileName + '.mp4');
+    const downloadFilePath = unusedFilenameSync(downloadFileName + `${options.audio_only ? '.mp3' : '.mp4'}`);
 
     // Build yt-dlp command with QuickTime-compatible encoding
     // --postprocessor-args: Force H.264 video and AAC audio encoding for QuickTime compatibility
-    const command = `yt-dlp ${useCookieCommand} ${formatCode} --recode-video mp4  -o "${downloadFileName}" ${options.video_url}`
+    const command = `yt-dlp ${useCookieCommand} ${formatCode} ${options.audio_only ? '--audio-format mp3' : '--recode-video mp4'}  -o "${downloadFilePath}" ${options.video_url}`
     console.log("command", command)
     const downloadVideo = await runProjectShellScript({
         command: command,

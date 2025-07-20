@@ -1,7 +1,9 @@
-export const summary_template = `Summarize this using the same language as the input. Start with a brief overall summary first, then break down the main points into structured sections or bullet points to enhance clarity and make it easy to read. Keep everything concise.
+export const summary_template = `Summarize this. Start with a brief overall summary first, then break down the main points into structured sections or bullet points to enhance clarity and make it easy to read. Keep everything concise.
 
 # Youtube Transcript Content:
 {{sources}}
+
+# Language: {{language}} 
 
 Summary:`;
 
@@ -13,6 +15,6 @@ export const humanPrompt = `Act as a helpful assistant , answer the following  i
 # Youtube Transcript Content:
 {{sources}}
 
-# Language:  use the same language as the input
+# Language: {{language}} 
 
 Response:`;

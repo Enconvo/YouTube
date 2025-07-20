@@ -85,7 +85,6 @@ async function handleNewSession(options: RequestOptions) {
         throw new Error("Unable to get a link")
     }
 
-
     res.writeLoading("Loading the subtitles")
 
     const { transcript } = await TranscriptLoader.load({
@@ -97,8 +96,10 @@ async function handleNewSession(options: RequestOptions) {
     console.log("transcript", transcript.slice(0, 100), isSummarize)
     await res.writeLoading("Thinking...")
 
+    const language = options.responseLanguage?.value === 'auto' ? 'use the same language as the input' : `use the language "${options.responseLanguage?.title}"`
+
     const humanTemplate = new StringTemplate(isSummarize ? summary_template : humanPrompt)
-    const userMessagePrompt = humanTemplate.format({ input: query, sources: transcript })
+    const userMessagePrompt = humanTemplate.format({ input: query, sources: transcript, language })
     const messages = [new UserMessage(userMessagePrompt)]
 
     return {

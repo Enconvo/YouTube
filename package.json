@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.51",
+  "version": "0.0.71",
   "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",
@@ -144,8 +144,16 @@
           "description": "The model used to generate responses",
           "type": "extension",
           "required": false,
-          "default": "default",
-          "title": "LLM Model"
+          "default": "enconvo_ai",
+          "title": "LLM Provider",
+          "group": "AI Model",
+          "defaultOptions": [
+            {
+              "commandName": "enconvo_ai",
+              "modelName": "openai/gpt-4.1-mini",
+              "temperature": 0
+            }
+          ]
         },
         {
           "name": "auto_audio_play",

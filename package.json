@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.96",
+  "version": "0.0.97",
   "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",
@@ -264,6 +264,13 @@
               "default": false,
               "title": "Audio Only",
               "description": "Whether to download only the audio, default is false"
+            },
+            {
+              "name": "force_convert_to_compatible_mp4",
+              "type": "checkbox",
+              "default": true,
+              "title": "Force Convert to Compatible MP4",
+              "description": "Whether to force convert to compatible mp4, default is true, if true, will extra consume CPU and time to convert"
             },
             {
               "name": "favorite_resolution",

@@ -1,4 +1,4 @@
-import { RequestOptions, res, ChatMessageContent, Action, ResponseAction, EnconvoResponse } from "@enconvo/api";
+import { RequestOptions, res, ChatMessageContent, Action, ResponseAction, EnconvoResponse, FileUtil } from "@enconvo/api";
 import { homedir } from "os";
 import path from "path";
 import { unusedFilenameSync } from "unused-filename";
@@ -89,6 +89,30 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     }
 
 
+    if (!options.audio_only && (options.video_url.includes('facebook.com') || options.video_url.includes('instagram.com')) && options.force_convert_to_compatible_mp4) {
+        const tempFilePath = FileUtil.createTempFilePath({
+            extension: 'mp4'
+        })
+        // console.log("tempFilePath", tempFilePath)
+
+        const convertToMp4Command = `ffmpeg -i "${downloadFilePath}" -c:v libx264 -c:a aac -movflags +faststart "${tempFilePath}"`
+        const convertToMp4 = await runProjectShellScript({
+            command: convertToMp4Command,
+            activeVenv: true,
+        })
+        // console.log("convertToMp4", convertToMp4)
+
+        if (convertToMp4.code === 0) {
+            // Move temp file to replace original
+            console.time("moveCommand")
+            const moveCommand = `mv "${tempFilePath}" "${downloadFilePath}"`
+            await runProjectShellScript({
+                command: moveCommand,
+                activeVenv: true,
+            })
+            console.timeEnd("moveCommand")
+        }
+    }
 
     const actions: ResponseAction[] = [
         Action.Paste({ content: { files: [downloadFilePath] }, closeMainWindow: true }),

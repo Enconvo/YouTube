@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.107",
+  "version": "0.0.108",
   "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",
@@ -13,6 +13,23 @@
     "Productivity"
   ],
   "commands": [
+    {
+      "name": "youtube_transcript",
+      "title": "Youtube Transcript",
+      "description": "Get the transcript from a YouTube video",
+      "commandType": "variable",
+      "icon": "icon.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "with_timestamps",
+          "type": "checkbox",
+          "default": true,
+          "title": "With timestamps",
+          "description": "With timestamps"
+        }
+      ]
+    },
     {
       "name": "get_youtube_transcript",
       "title": "Get Youtube Transcript",

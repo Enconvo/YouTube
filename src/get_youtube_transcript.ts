@@ -22,11 +22,13 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     // isLoading = true
 
     const options: Params = await req.json();
+    console.log("get youtube transcript options", options)
 
     let youtube_url: string = options.url || ""
     let youtube_title: string = options.title || ""
     if (!youtube_url || youtube_url.length === 0) {
         const resp = await Commander.send("getDocumentUrl")
+        console.log("getDocumentUrl response", resp)
         youtube_url = resp.data?.url
         youtube_title = resp.data?.title
     }

@@ -5,6 +5,7 @@ import { unusedFilenameSync } from "unused-filename";
 import sanitizeFilename from "sanitize-filename";
 import { runProjectShellScript } from "./utils/python_utils.ts";
 import { getVideoInfo } from "./utils/video.ts";
+import { setTimeout } from "timers";
 
 
 interface DownloadVideoOptions extends RequestOptions {
@@ -94,7 +95,9 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
             extension: 'mp4'
         })
         // console.log("tempFilePath", tempFilePath)
-
+        setTimeout(async () => {
+            res.writeLoading('Converting to compatible mp4...')
+        }, 500)
         const convertToMp4Command = `ffmpeg -i "${downloadFilePath}" -c:v libx264 -c:a aac -movflags +faststart "${tempFilePath}"`
         const convertToMp4 = await runProjectShellScript({
             command: convertToMp4Command,

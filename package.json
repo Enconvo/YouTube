@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.97",
+  "version": "0.0.107",
   "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",
@@ -13,6 +13,64 @@
     "Productivity"
   ],
   "commands": [
+    {
+      "name": "get_youtube_transcript",
+      "title": "Get Youtube Transcript",
+      "description": "Get youtube transcript",
+      "commandType": "context",
+      "icon": "icon.png",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "enabled",
+          "type": "checkbox",
+          "title": "Enabled",
+          "description": "Enabled",
+          "default": true
+        },
+        {
+          "name": "attach_mode",
+          "description": "Attach Mode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Attach Mode",
+          "default": "suggestion",
+          "data": [
+            {
+              "title": "Attach On Smartbar Show",
+              "value": "smartbar"
+            },
+            {
+              "title": "Suggestion",
+              "value": "suggestion"
+            }
+          ]
+        },
+        {
+          "name": "with_timestamps",
+          "type": "checkbox",
+          "default": true,
+          "title": "With timestamps",
+          "description": "With timestamps"
+        },
+        {
+          "name": "include_application_condition",
+          "type": "application-list",
+          "title": "Show Context when the below application is at front",
+          "description": "Show Context when the below application is at front",
+          "default": []
+        },
+        {
+          "name": "include_url_condition",
+          "type": "textfield-tags",
+          "title": "Or the opened url includes the below texts",
+          "description": "Or the opened url includes the below texts",
+          "default": [
+            "www.youtube.com/watch?v="
+          ]
+        }
+      ]
+    },
     {
       "name": "youtube_transcript_loader",
       "title": "Youtube Transcript Loader",

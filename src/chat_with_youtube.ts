@@ -34,7 +34,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     const combineModel = await LLMProvider.fromEnv()
     const finalMessage = await combineModel.stream({ messages })
 
-    const response = finalMessage.text()
+    const response = finalMessage.text
 
 
     const actions: ResponseAction[] = [

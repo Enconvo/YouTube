@@ -12,10 +12,10 @@ interface Params extends RequestOptions {
 export default async function main(req: Request): Promise<Response> {
     const options: Params = await req.json();
 
-    const { youtube_url, input_text, selection_text, current_browser_tab } = options;
+    const { youtube_url, document_url, input_text, selection_text, current_browser_tab } = options;
     console.log({ youtube_url, input_text, selection_text, current_browser_tab })
 
-    let inputText = youtube_url || input_text || selection_text || current_browser_tab?.url;
+    let inputText = youtube_url || document_url || input_text || selection_text || current_browser_tab?.url;
 
     if (!inputText) {
         throw new Error("No youtube video to be processed")

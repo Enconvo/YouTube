@@ -1,4 +1,4 @@
-import { RequestOptions, res, ChatMessageContent, Action, ResponseAction, EnconvoResponse, FileUtil } from "@enconvo/api";
+import { RequestOptions, res, ChatMessageContent, Action, ResponseAction, EnconvoResponse, FileUtil, BrowserTabContextItem, NativeAPI } from "@enconvo/api";
 import { homedir } from "os";
 import path from "path";
 import { unusedFilenameSync } from "unused-filename";
@@ -31,9 +31,21 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     // Replace ~ with home directory path
     options.output_dir = options.output_dir.replace(/^~/, homedir())
 
-    const youtubeUrl = options.video_url || options.input_text || options.selection_text || options.current_browser_tab?.url
+    let youtubeUrl = options.video_url || options.input_text
     if (!youtubeUrl) {
-        throw new Error("No youtube video to be processed")
+
+        youtubeUrl = options.context_items?.find((item) => item.type === 'browserTab')?.url
+        console.log("context_items youtubeUrl", youtubeUrl)
+        if (!youtubeUrl) {
+            const resp = await NativeAPI.callCommand('browser_context|get_browser_current_tab_url')
+            const { items } = resp.data as { items: BrowserTabContextItem[] }
+            if (items.length > 0) {
+                youtubeUrl = items[0].url
+                console.log("get_browser_current_tab_url youtubeUrl", youtubeUrl)
+            } else {
+                throw new Error("Unable to get youtube url")
+            }
+        }
     }
 
     options.video_url = youtubeUrl
@@ -125,7 +137,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
 
     return EnconvoResponse.content(
         [
-            ChatMessageContent.video({ url: `file://${downloadFilePath}` })
+            ChatMessageContent.video({ url: `${downloadFilePath}` })
         ],
         false,
         actions

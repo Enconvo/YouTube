@@ -1,4 +1,4 @@
-import { Action, Exporter, RequestOptions, ResponseAction, res, EnconvoResponse } from "@enconvo/api";
+import { Action, Exporter, RequestOptions, ResponseAction, res, EnconvoResponse, BrowserTabContextItem, NativeAPI } from "@enconvo/api";
 import fs from "fs";
 import { TranscriptLoader } from "./utils/transcript_loader.ts";
 
@@ -12,18 +12,29 @@ interface Params extends RequestOptions {
 export default async function main(req: Request): Promise<Response> {
     const options: Params = await req.json();
 
-    const { youtube_url, document_url, input_text, selection_text, current_browser_tab } = options;
-    console.log({ youtube_url, input_text, selection_text, current_browser_tab })
+    const { youtube_url, input_text } = options;
+    console.log({ youtube_url, input_text })
 
-    let inputText = youtube_url || document_url || input_text || selection_text || current_browser_tab?.url;
+    let youtubeUrl = youtube_url || input_text
+    if (!youtubeUrl) {
 
-    if (!inputText) {
-        throw new Error("No youtube video to be processed")
+        youtubeUrl = options.context_items?.find((item) => item.type === 'browserTab')?.url
+        console.log("context_items youtubeUrl", youtubeUrl)
+        if (!youtubeUrl) {
+            const resp = await NativeAPI.callCommand('browser_context|get_browser_current_tab_url')
+            const { items } = resp.data as { items: BrowserTabContextItem[] }
+            if (items.length > 0) {
+                youtubeUrl = items[0].url
+                console.log("get_browser_current_tab_url youtubeUrl", youtubeUrl)
+            } else {
+                throw new Error("Unable to get youtube url")
+            }
+        }
     }
 
     res.writeLoading('Getting transcript...')
     const result = await TranscriptLoader.load({
-        url: inputText,
+        url: youtubeUrl,
         with_timestamps: options.with_timestamps,
         language: typeof options.language === "string" ? options.language : options.language.value
     })

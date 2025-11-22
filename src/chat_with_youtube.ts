@@ -1,4 +1,4 @@
-import { Browser, Action, res, RequestOptions, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider, EnconvoResponse } from "@enconvo/api";
+import { Browser, Action, res, RequestOptions, ResponseAction, BaseChatMessage, StringTemplate, UserMessage, LLMProvider, EnconvoResponse, BrowserTabContextItem, NativeAPI } from "@enconvo/api";
 import { humanPrompt, summary_template } from "./prompts/prompts.ts";
 import { TranscriptLoader } from "./utils/transcript_loader.ts";
 
@@ -68,9 +68,24 @@ async function handleNewSession(options: RequestOptions) {
             link = current_browser_tab.url
             title = current_browser_tab.title
         } else {
-            currentBrowserTab = await Browser.currentTab()
-            link = currentBrowserTab?.url || ''
-            title = currentBrowserTab?.title || ''
+
+            const browserTab: BrowserTabContextItem | undefined = options.context_items?.find((item) => item.type === 'browserTab')
+            let youtubeUrl = browserTab?.url
+            console.log("context_items youtubeUrl", youtubeUrl)
+            if (!youtubeUrl) {
+                const resp = await NativeAPI.callCommand('browser_context|get_browser_current_tab_url')
+                const { items } = resp.data as { items: BrowserTabContextItem[] }
+                if (items.length > 0) {
+                    link = items[0].url
+                    title = items[0].title || ''
+                    console.log("get_browser_current_tab_url youtubeUrl", link, title)
+                } else {
+                    throw new Error("Unable to get youtube url")
+                }
+            } else {
+                link = youtubeUrl
+                title = browserTab?.title || ''
+            }
         }
     }
 

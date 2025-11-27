@@ -5,5 +5,5 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "yt-dlp>=2025.10.22",
+    "yt-dlp>=2025.11.12",
 ]

@@ -149,11 +149,11 @@ export interface VideoInfo {
 
 }
 
-export async function getVideoInfo(url: string): Promise<VideoInfo> {
+export async function getVideoInfo(url: string, useCookieCommand: string): Promise<VideoInfo> {
 
     const result = await runProjectPythonScript({
         pythonFile: 'extract_link.py',
-        params: [url],
+        params: [url, useCookieCommand],
     })
     if (result.code !== 0) {
         console.error('Failed to extract video info', result)

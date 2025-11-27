@@ -13,13 +13,14 @@ def main():
         description='Extract video information and formats from YouTube URL')
     parser.add_argument(
         'url', type=str, help='YouTube URL to extract information from')
-
+    parser.add_argument(
+        '--cookies-from-browser', type=str, help='Cookies from browser')
     # Parse command line arguments
     args = parser.parse_args()
 
     # Get URL from command line arguments
     url = args.url
-
+    cookies_from_browser = args.cookies_from_browser
     # Configure yt-dlp options to match -J -F flags
     # -J: Output video information as JSON
     # -F: List all available formats
@@ -29,6 +30,14 @@ def main():
         'no_warnings': True,  # Suppress warning messages
         'extract_flat': False,  # Extract full information
     }
+    if cookies_from_browser:
+        # Expect cookies_from_browser as a comma-separated string, e.g., "chrome" or "firefox,default"
+        # Convert to tuple
+        cookies_tuple = tuple(
+            part.strip() if part.strip() != 'None' else None 
+            for part in cookies_from_browser.split(',')
+        )
+        ydl_opts['cookiesfrombrowser'] = cookies_tuple
 
     try:
         # Create YoutubeDL instance with configured options

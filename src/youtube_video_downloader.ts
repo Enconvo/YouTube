@@ -51,9 +51,11 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     options.video_url = youtubeUrl
     res.writeLoading('Getting video info...')
 
-    const videoInfo = await getVideoInfo(options.video_url)
-
     const useCookieCommand = options.use_cookies ? `--cookies-from-browser ${options.browser_type.value}` : ''
+    const videoInfo = await getVideoInfo(options.video_url, useCookieCommand)
+
+    console.log("videoInfo", videoInfo)
+
 
     let videoTitle = videoInfo.id
 

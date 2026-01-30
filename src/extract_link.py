@@ -30,12 +30,12 @@ def main():
         'no_warnings': True,  # Suppress warning messages
         'extract_flat': False,  # Extract full information
     }
-    if cookies_from_browser:
+    if cookies_from_browser and cookies_from_browser.strip():
         # Expect cookies_from_browser as a comma-separated string, e.g., "chrome" or "firefox,default"
         # Convert to tuple
         cookies_tuple = tuple(
             part.strip() if part.strip() != 'None' else None 
-            for part in cookies_from_browser.split(',')
+            for part in cookies_from_browser.split(',') 
         )
         ydl_opts['cookiesfrombrowser'] = cookies_tuple
 

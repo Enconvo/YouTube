@@ -1,7 +1,7 @@
 {
   "$schema": "https://enconvo.com/schemas/extension.json",
   "name": "youtube",
-  "version": "0.0.126",
+  "version": "0.0.133",
   "description": "Youtube tools",
   "title": "Youtube",
   "icon": "icon.png",
@@ -395,7 +395,7 @@
             {
               "name": "use_cookies",
               "type": "checkbox",
-              "default": true,
+              "default": false,
               "title": "Use Browser Cookies",
               "description": "Whether to use browser cookies for some private videos"
             },

@@ -1,4 +1,4 @@
-import { RequestOptions, res, ChatMessageContent, Action, ResponseAction, EnconvoResponse, FileUtil, BrowserTabContextItem, NativeAPI } from "@enconvo/api";
+import { RequestOptions, res, ChatMessageContent, Action, ResponseAction, EnconvoResponse, FileUtil, BrowserTabContextItem, NativeAPI, generateNameString } from "@enconvo/api";
 import { homedir } from "os";
 import path from "path";
 import { unusedFilenameSync } from "unused-filename";
@@ -51,13 +51,26 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
     options.video_url = youtubeUrl
     res.writeLoading('Getting video info...')
 
+    const versionCommand = `yt-dlp --version`
+    console.log("versionCommand", versionCommand)
+    const versionResult = await runProjectShellScript({
+        command: versionCommand,
+        activeVenv: true,
+    })
+    console.log("versionResult", versionResult)
+
     const useCookieCommand = options.use_cookies ? `--cookies-from-browser ${options.browser_type.value}` : ''
-    const videoInfo = await getVideoInfo(options.video_url, useCookieCommand)
 
-    console.log("videoInfo", videoInfo)
+    const isTwitterUrl = options.video_url.includes('twitter.com') || options.video_url.includes('x.com')
 
-
-    let videoTitle = videoInfo.id
+    let videoTitle: string
+    if (isTwitterUrl) {
+        videoTitle = generateNameString()
+    } else {
+        const videoInfo = await getVideoInfo(options.video_url, useCookieCommand)
+        console.log("videoInfo", videoInfo)
+        videoTitle = videoInfo.id
+    }
 
     videoTitle = sanitizeFilename(videoTitle)
 
@@ -78,14 +91,7 @@ export default async function main(req: Request): Promise<EnconvoResponse> {
 
     // Build yt-dlp command with QuickTime-compatible encoding
     // --postprocessor-args: Force H.264 video and AAC audio encoding for QuickTime compatibility
-    const versionCommand = `yt-dlp --version`
-    console.log("versionCommand", versionCommand)
-    const versionResult = await runProjectShellScript({
-        command: versionCommand,
-        activeVenv: true,
-    })
-    console.log("versionResult", versionResult)
-    const command = `yt-dlp ${useCookieCommand} ${formatCode} ${options.audio_only ? '--audio-format mp3' : '--recode-video mp4'}  -o "${downloadFilePath}" ${options.video_url}`
+    const command = `yt-dlp ${useCookieCommand} --extractor-args "twitter:api=syndication" ${formatCode} ${options.audio_only ? '--audio-format mp3' : '--recode-video mp4'}  -o "${downloadFilePath}" ${options.video_url} `
     console.log("command", command)
     const downloadVideo = await runProjectShellScript({
         command: command,

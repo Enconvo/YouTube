@@ -155,6 +155,7 @@ export async function getVideoInfo(url: string, useCookieCommand: string): Promi
         pythonFile: 'extract_link.py',
         params: [url, useCookieCommand],
     })
+    console.log("result", result)
     if (result.code !== 0) {
         console.error('Failed to extract video info', result)
         throw new Error(`Failed to extract video info, ${result.output}`)
